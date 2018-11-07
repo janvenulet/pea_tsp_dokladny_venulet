@@ -30,6 +30,8 @@ double GetCounter()
 
 myGraph::myGraph(char * filePath)
 {
+	szczyt = 0;
+	tmpSzczyt = 0;
 	//shortestPath = new myStack();
 	std::fstream file;
 	file.open(filePath, std::fstream::in);
@@ -69,21 +71,23 @@ myGraph::~myGraph()
 	delete[] matrix;
 }
 
-void myGraph::TSP_bruteForceRecurence(int startVertexIndex, int currentVertexIndex, myStack *tmpStack, bool * visited, int *tmpPathWeight)
+void myGraph::TSP_bruteForceRecurence(int startVertexIndex, int currentVertexIndex, bool * visited, int *tmpPathWeight)
 {
-	tmpStack->push(currentVertexIndex);
-	if (tmpStack->getSize() != this->size)
+	//tmpStack->push(currentVertexIndex);
+	tmpStos[tmpSzczyt++] = currentVertexIndex;
+	if (tmpSzczyt < this->size)
 	{
 		visited[currentVertexIndex] = true; 
 		for (int j = 0; j < size; j++)
 		{
 			if (visited[j]) continue;
 			*tmpPathWeight += matrix[currentVertexIndex][j];
-			TSP_bruteForceRecurence(startVertexIndex, j , tmpStack, visited,tmpPathWeight);
+			TSP_bruteForceRecurence(startVertexIndex, j , visited,tmpPathWeight);
 			*tmpPathWeight -= matrix[currentVertexIndex][j];
 		}
 		visited[currentVertexIndex]=false;
-		tmpStack->pop();		
+		tmpSzczyt--;
+		//tmpStack->pop();		
 		return;
 
 	}
@@ -93,11 +97,16 @@ void myGraph::TSP_bruteForceRecurence(int startVertexIndex, int currentVertexInd
 		if (*tmpPathWeight < this->shortestPathWeight)
 		{
 			this->shortestPathWeight = *tmpPathWeight;
-			this->shortestPath = *tmpStack;
+			//this->shortestPath = *tmpStack;
+			for (int i=0; i<tmpSzczyt; i++)
+			{
+				Stos[i] = tmpStos[i];
+			}
+			szczyt = tmpSzczyt;
 		}
 		*tmpPathWeight -= matrix[currentVertexIndex][startVertexIndex];
 	}
-	tmpStack->pop();
+	tmpSzczyt--;
 	return;
 }
 
@@ -117,7 +126,7 @@ void myGraph::BFTest(int reps, int startVertexIndex)
 		}
 		double time;
 		StartCounter();
-		TSP_bruteForceRecurence(startVertexIndex, startVertexIndex, tmpStack, visited, tmpPathWeight);
+		TSP_bruteForceRecurence(startVertexIndex, startVertexIndex, visited, tmpPathWeight);
 		time = GetCounter();
 		aggregateTime += time; 
 		cout << i << " : " << time << " ms \tAggregated time: " << aggregateTime << "ms"<< endl;
@@ -138,7 +147,7 @@ void myGraph::TSP_bruteForce(int startVertexIndex)
 	}
 	double time;
 	StartCounter();
-	TSP_bruteForceRecurence(startVertexIndex, startVertexIndex, tmpStack, visited, tmpPathWeight);
+	TSP_bruteForceRecurence(startVertexIndex, startVertexIndex, visited, tmpPathWeight);
 	time = GetCounter();
 	//cout << "\nHej:" << shortestPath.getSize() << endl;
 	if (this->shortestPathWeight == INT_MAX)
@@ -162,10 +171,11 @@ void myGraph::TSP_bruteForce(int startVertexIndex)
 	testStack->push(11);
 	testStack->push(3);
 	*/
-	for (int i = shortestPath.getSize(); i > 0  ; i--)
+	for (int i = size -1 ; i > 0  ; i--)
 	{
 		cout << "Vertex[" << i << "] : ";
-		cout << shortestPath.showStackIndex(i-1) << endl;
+		//cout << shortestPath.showStackIndex(i-1) << endl;
+		cout << Stos[i] << endl;
 	}
 	cout << "Vertex[0] : " << startVertexIndex <<  endl;
 	getchar();

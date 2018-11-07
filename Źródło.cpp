@@ -3,9 +3,9 @@
 #include <Windows.h>
 using namespace std;
 
-const char * welcome = "Welcome \nto program solving traveling salesman problem(TSP).\nDeveloped by: Jan Maksymilian Venulet\nOctober 2018\n\n\n";
+const char * welcome = "Welcome \nto program solving traveling salesman problem(TSP).\nDeveloped by: Jan Maksymilian Venulet 235542\nOctober 2018\n\n\n";
 const char * menu = "1. Read data from constant file\n2. Read data from given file(not supported yet)\n3. Use brute force to find shortest path\n4. Display graph\n5. Run tests\n0. Exit program\nEnter your choice : ";
-const char * filePath = "C:\\Users\\Jan\\source\\repos\\pea_tsp_dokladny_venulet\\dane6.txt";
+const char * filePath = "C:\\Users\\Jan\\source\\repos\\pea_tsp_dokladny_venulet\\dane13.txt";
 
 
 

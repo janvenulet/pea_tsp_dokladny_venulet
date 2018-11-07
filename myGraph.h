@@ -5,8 +5,13 @@ class myGraph
 	private:
 		int size;
 		int **matrix;
-		 myStack shortestPath; 
-		 myStack testFinal;
+		 //myStack shortestPath; 
+		int szczyt; 
+		int tmpSzczyt;
+		int Stos[100];
+		int tmpStos[100];
+		int *shortestPath;
+		myStack testFinal;
 		int shortestPathWeight;
 	
 public:
@@ -15,7 +20,7 @@ public:
 		~myGraph();
 
 		void TSP_bruteForce(int);
-		void TSP_bruteForceRecurence(int, int, myStack *, bool *, int *);
+		void TSP_bruteForceRecurence(int, int, bool *, int *);
 		int getShortestPathWeight();
 		int getSize();
 		void display();
