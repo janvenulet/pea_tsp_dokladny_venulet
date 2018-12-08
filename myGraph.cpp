@@ -1,6 +1,6 @@
 #include"myGraph.h"
-#include<fstream>
-#include<iostream>
+
+
 
 using namespace std;
 
@@ -30,7 +30,8 @@ double GetCounter()
 
 myGraph::myGraph(char * filePath)
 {
-	//shortestPath = new myStack();
+	szczyt = 0;
+	tmpSzczyt = 0;
 	std::fstream file;
 	file.open(filePath, std::fstream::in);
 	if (!file.is_open())
@@ -69,21 +70,21 @@ myGraph::~myGraph()
 	delete[] matrix;
 }
 
-void myGraph::TSP_bruteForceRecurence(int startVertexIndex, int currentVertexIndex, myStack *tmpStack, bool * visited, int *tmpPathWeight)
+void myGraph::TSP_bruteForceRecurence(int startVertexIndex, int currentVertexIndex, bool * visited, int *tmpPathWeight)
 {
-	tmpStack->push(currentVertexIndex);
-	if (tmpStack->getSize() != this->size)
+	tmpStos[tmpSzczyt++] = currentVertexIndex;
+	if (tmpSzczyt < this->size)
 	{
 		visited[currentVertexIndex] = true; 
 		for (int j = 0; j < size; j++)
 		{
 			if (visited[j]) continue;
 			*tmpPathWeight += matrix[currentVertexIndex][j];
-			TSP_bruteForceRecurence(startVertexIndex, j , tmpStack, visited,tmpPathWeight);
+			TSP_bruteForceRecurence(startVertexIndex, j , visited,tmpPathWeight);
 			*tmpPathWeight -= matrix[currentVertexIndex][j];
 		}
 		visited[currentVertexIndex]=false;
-		tmpStack->pop();		
+		tmpSzczyt--;		
 		return;
 
 	}
@@ -93,11 +94,15 @@ void myGraph::TSP_bruteForceRecurence(int startVertexIndex, int currentVertexInd
 		if (*tmpPathWeight < this->shortestPathWeight)
 		{
 			this->shortestPathWeight = *tmpPathWeight;
-			this->shortestPath = *tmpStack;
+			for (int i=0; i<tmpSzczyt; i++)
+			{
+				Stos[i] = tmpStos[i];
+			}
+			szczyt = tmpSzczyt;
 		}
 		*tmpPathWeight -= matrix[currentVertexIndex][startVertexIndex];
 	}
-	tmpStack->pop();
+	tmpSzczyt--;
 	return;
 }
 
@@ -117,7 +122,7 @@ void myGraph::BFTest(int reps, int startVertexIndex)
 		}
 		double time;
 		StartCounter();
-		TSP_bruteForceRecurence(startVertexIndex, startVertexIndex, tmpStack, visited, tmpPathWeight);
+		TSP_bruteForceRecurence(startVertexIndex, startVertexIndex, visited, tmpPathWeight);
 		time = GetCounter();
 		aggregateTime += time; 
 		cout << i << " : " << time << " ms \tAggregated time: " << aggregateTime << "ms"<< endl;
@@ -127,7 +132,6 @@ void myGraph::BFTest(int reps, int startVertexIndex)
 }
 void myGraph::TSP_bruteForce(int startVertexIndex)
 {
-	myStack *tmpStack = new myStack;
 	int * tmpPathWeight = new int;
 	*tmpPathWeight = 0; 
 	this->shortestPathWeight = INT_MAX;
@@ -138,38 +142,25 @@ void myGraph::TSP_bruteForce(int startVertexIndex)
 	}
 	double time;
 	StartCounter();
-	TSP_bruteForceRecurence(startVertexIndex, startVertexIndex, tmpStack, visited, tmpPathWeight);
+	TSP_bruteForceRecurence(startVertexIndex, startVertexIndex, visited, tmpPathWeight);
 	time = GetCounter();
-	//cout << "\nHej:" << shortestPath.getSize() << endl;
 	if (this->shortestPathWeight == INT_MAX)
 	{
 		cout << "Shortes Hamilton path hasn't been found" << endl;
 		getchar();
 		delete[]visited;
-		delete tmpStack;
 		return; 
 	}
 	cout << "Shortes Hamilton path's weight is: " << this->shortestPathWeight << endl;
 	cout << "Found in: " << time << " ms" << endl;
 	cout << "Founded path's order is as following: " << endl;
-	/*
-	myStack *testStack = new myStack();
-	testStack->push(4);
-	testStack->push(7);
-	testStack->push(5);
-	testStack->push(6);
-	testStack->push(0);
-	testStack->push(11);
-	testStack->push(3);
-	*/
-	for (int i = shortestPath.getSize(); i > 0  ; i--)
+	for (int i = size -1 ; i > 0  ; i--)
 	{
 		cout << "Vertex[" << i << "] : ";
-		cout << shortestPath.showStackIndex(i-1) << endl;
+		cout << Stos[i] << endl;
 	}
 	cout << "Vertex[0] : " << startVertexIndex <<  endl;
 	getchar();
-	delete tmpStack;
 	delete []visited;
 	return; 
 }
@@ -191,7 +182,6 @@ void myGraph::display()
 	{
 		for (int j = 0; j < this->size; j++)
 		{
-			//cout << "Matrix[" << i << "][" << j << "] =" << this->matrix[i][j] << endl;
 			if (j == 0) cout << i << "| ";
 			cout << this->matrix[i][j] << " ";
 		}
@@ -207,4 +197,85 @@ int myGraph::getSize()
 int myGraph::getShortestPathWeight()
 {
 	return this->shortestPathWeight;
+}
+
+int myGraph::pathLength(vector<int> vector)
+{
+	int result = 0;
+	int tmp = 0; 
+	for (int i = 1; i < this->size; i++) //-1 bo dla ostatniego dadawane jest recznie
+	{
+		result += matrix[tmp][vector[i]];
+		tmp = vector[i];
+	}
+	result += matrix[tmp][0];
+	return result;
+}
+
+void myGraph::swapVertex() 
+{
+	int vertex1 = rand() % (this->size - 1)+1;
+	int vertex2 = rand() % (this->size - 1)+1;
+	while (vertex1 == vertex2)
+	{
+		vertex2 = rand() % (this->size - 1)+1;
+	}
+	int tmp = bestPath[vertex1];
+	tmpPath = bestPath;
+	tmpPath[vertex1] = tmpPath[vertex2];
+	tmpPath[vertex2] = tmp;
+}
+
+void myGraph::TSP_SimulatedAnnealing(double a, double b, double c) 
+{
+	this->Temperature = a; 
+	this->minTemperature = b;
+	this->coolingRate = c;
+	uniform_real_distribution<double> distribution(0.0, 1.0);
+	default_random_engine generator;
+	double stalaEulera = 2.718281828459;
+	srand((unsigned int)time(NULL));
+	for (int i = 0; i < this->size; i++) //inicjowanie poczatkowej sciezki
+	{
+		bestPath.push_back(i);
+	}
+	tmpPath = bestPath;
+	shortestPathWeight = pathLength(tmpPath);
+	tmpShortestPathWeight = shortestPathWeight;
+	while (Temperature > minTemperature) 
+	{
+		swapVertex();
+		tmpShortestPathWeight = pathLength(tmpPath);
+		if (tmpShortestPathWeight < shortestPathWeight) 
+		{
+			shortestPathWeight = tmpShortestPathWeight;
+			bestPath = tmpPath;
+		}
+		else if (pow(stalaEulera,(shortestPathWeight - tmpShortestPathWeight)/Temperature) > distribution(generator))
+		{
+			shortestPathWeight = tmpShortestPathWeight;
+			bestPath = tmpPath;
+		}
+		Temperature *= coolingRate;
+	}
+}
+
+void myGraph::SA_Test(int reps)
+{
+	double aggregateTime = 0.0;
+	int shortest=2000000000, aggregatePath=0;
+	for (int i = 0; i < reps; i++)
+	{
+		double time;
+		StartCounter();
+		this->TSP_SimulatedAnnealing((double)1000000, (double)0.000001, (double) 0.999999);
+		time = GetCounter();
+		aggregateTime += time;
+		cout << i << " : " << time << " ms Result: "<< this->shortestPathWeight<<"\t\tAggregated time: " << aggregateTime << "ms" << endl;
+		if (this->shortestPathWeight < shortest) shortest = this->shortestPathWeight;
+		aggregatePath += this->shortestPathWeight;
+	}
+	cout << "\n\nFinal time for " << reps << " repetitions for this graph was : " << aggregateTime << "ms" << endl;
+	cout << "Average time for " << reps << " repetitions for this graph was : " << aggregateTime / reps << "ms" << endl;
+	cout << "Shortest founded path: " << shortest << "\nAverage % error from shortest founded path: " << (double)((double)((double)(aggregatePath / reps) / shortest))*100<< "%" << endl;
 }

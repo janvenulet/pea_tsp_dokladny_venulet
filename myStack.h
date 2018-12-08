@@ -1,10 +1,20 @@
 #pragma once
 
 
-struct myVertex
+class myVertex
 {
+public:
 	int index;
 	myVertex *next;
+
+	myVertex()
+	{
+		//next = new myVertex;
+	}
+	~myVertex()
+	{
+		//delete next; 
+	}
 };
 
 

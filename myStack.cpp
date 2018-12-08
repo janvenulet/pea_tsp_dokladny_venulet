@@ -4,16 +4,16 @@
 
 myStack::myStack()
 {
-	head = nullptr;
-	size = 0;
+	//head = nullptr;
+	//size = 0;
 }
 
 myStack::~myStack()
 {
 	//while (head != nullptr)
-	
-		delete this->head;
-	
+
+	delete this->head;
+
 }
 
 int myStack::pop(void)
@@ -21,7 +21,7 @@ int myStack::pop(void)
 	if (this->head == nullptr)
 	{
 		std::cout << "Stack is empty";
-		return 0; 
+		return 0;
 	}
 	else
 	{
@@ -32,35 +32,37 @@ int myStack::pop(void)
 	}
 }
 
-void myStack:: push(int a)
+void myStack::push(int a)
 {
 	if (head == nullptr)
 	{
 		myVertex *tmp = new myVertex;
 		tmp->index = a;
-		tmp->next = nullptr; 
+		tmp->next = nullptr;
 		head = tmp;
 		size++;
 	}
 	else
 	{
-		myVertex * tmp = new myVertex;
-		tmp->index = a; 
-		tmp->next=head; 
-		head = tmp;
+		myVertex tmp;
+		tmp.index = a;
+		tmp.next = head;
+		head = &tmp;
+		//delete tmp;
 		size++;
 	}
 }
 
 int myStack::showStackIndex(int a)
 {
-	myVertex * indexedVertex = this->head; 
+	myVertex * indexedVertex = this->head;
 	for (int i = 0; i < a; i++)
 	{
 		indexedVertex = indexedVertex->next;
 	}
 	if (indexedVertex != nullptr)
-	return indexedVertex->index;
+		return indexedVertex->index;
+	delete indexedVertex;
 }
 
 int myStack::getSize()
